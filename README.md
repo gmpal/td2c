@@ -1,37 +1,43 @@
+# TD2C (Time-Dependency to Causality)
 **TD2C (Time-Dependency to Causality)** is a library for time series causal discovery. It focuses on computing asymmetric conditional mutual information terms, known as descriptors, within the Markov blankets of variable pairs.
 
+
+## Setup
 To get started with TD2C, follow these steps:
 
-1. Create a new conda environment:
+1. Create a virtual environment with the tool of your choice:
+    1. Use `pyenv` (recommended):
+        ```
+        curl https://pyenv.run | bash
+        pyenv virtualenv 3.10 td2c
+        pyenv shell td2c
+        ```
+    2. Use `conda`:
+        ```
+        conda create --name td2c python=3.8.19 ipython
+        conda activate td2c
+        ```
+
+2. Install Poetry for dependencies management:
     ```
-    conda create --name td2c
+    pip install --upgrade pip
+    pip install poetry
     ```
 
-2. Activate the conda environment:
+3. Install dependencies from `poetry.lock` file:
     ```
-    conda activate td2c
-    ```
-
-3. Install pip in the environment:
-    ```
-    conda install pip
+    poetry install
     ```
 
-4. Verify that pip is installed:
+4. If the above fails, you can resolve dependencies and try again. This will take a few minutes. 
     ```
-    which pip
+    poetry lock
+    poetry install
     ```
 
-    If it's not installed, add it to the system's path.
-    ```
-    export PATH="/home/yourusername/miniconda3/envs/your_env_name/bin:$PATH"
-    ```
-    
+5. Setup completed. 
 
-5. Install TD2C using pip:
-    ```
-    pip install .
-    ```
+## Usage
 
 
 ## How to update the documentation? 
