@@ -1,7 +1,6 @@
 # TD2C (Time-Dependency to Causality)
 **TD2C (Time-Dependency to Causality)** is a library for time series causal discovery. It focuses on computing asymmetric conditional mutual information terms, known as descriptors, within the Markov blankets of variable pairs.
 
-
 ## Setup
 To get started with TD2C, follow these steps:
 
@@ -38,10 +37,9 @@ To get started with TD2C, follow these steps:
 5. Setup completed. 
 
 ## Usage
+Check the notebooks in the [notebooks folder](./notebooks) for detailed examples and explanations:
 
-
-## How to update the documentation? 
-1. Make changes to `docs/` content on the `main` branch
-2. re-build the book with `jupyter-book build docs/` 
-3. from the `docs/` folder run `ghp-import -n -p -f _build/html` to push the newly built HTML to the `gh-pages` branch
-4. 
+- [00_data_generation.ipynb](./notebooks/00_data_generation.ipynb): Demonstrates how to generate synthetic data for testing the TD2C library.
+- [01_descriptors_computation.ipynb](./notebooks/01_descriptors_computation.ipynb): Shows how to compute the descriptors using the TD2C library.
+- [02_run_competitors.ipynb](./notebooks/02_run_competitors.ipynb): Provides examples of running competitor algorithms for comparison.
+- [03_collect_results.ipynb](./notebooks/03_collect_results.ipynb): Illustrates how to collect and analyze the results from the experiments.
