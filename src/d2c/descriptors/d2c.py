@@ -38,6 +38,33 @@ class D2C:
         verbose (bool): Whether to print verbose output.
         n_jobs (int): Number of parallel jobs to run.
         seed (int): Random seed for reproducibility.
+
+    Methods:
+
+        initialize(self):
+            Initialize the D2C object by computing descriptors in parallel for all observations.
+        compute_descriptors_without_dag(self, n_variables, maxlags):
+            Compute all descriptors when a DAG is not available.
+        compute_descriptors_with_dag(self, dag_idx, dag, n_variables, maxlags, num_samples=20):
+            Compute all descriptors associated to a DAG.
+        get_markov_blanket(self, dag, node):
+            Compute the REAL Markov Blanket of a node in a specific DAG.
+        standardize_data(self, observations):
+            Standardize the observation DataFrame.
+        check_data_validity(self, observations):
+            Check the validity of the data.
+        update_dictionary_quantiles(self, dictionary, name, quantiles):
+            Update the dictionary with quantiles.
+        update_dictionary_distribution(self, dictionary, name, values):
+            Update the dictionary with distribution moments.
+        update_dictionary_actual_values(self, dictionary, name, values):
+            Update the dictionary with actual values.
+        compute_descriptors_for_couple(self, dag_idx, ca, ef, label):
+            Compute descriptors for a given couple of nodes in a DAG.
+        get_descriptors_df(self):
+            Get the concatenated DataFrame of X and Y.
+        get_test_couples(self):
+            Get the test couples.
     """
 
     def __init__(
