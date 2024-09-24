@@ -121,4 +121,4 @@ class D2CWrapper(BaseCausalInference):
             ["from", "to", "effect", "p_value", "probability", "is_causal"]
         ]
 
-        return causal_df
+        return causal_df.sort_values(by=["from", "to"]).reset_index(drop=True)

@@ -191,8 +191,17 @@ class DataLoader:
         return self._rename_dags(self.dags, self.n_variables)
 
     def get_true_causal_dfs(self):
-        causal_dataframes = []
-        for dag in self._rename_dags(self.dags, self.n_variables):
+        """
+        Get dataframes indicating the true causal relationships in the DAGs.
+        This is useful for benchmarking.
+        The structure of the dataframe is as follows:
+        - The columns are "from", "to", and "is_causal".
+        - The "from" column indicates the source variable.
+        - The "to" column indicates the effect variable.
+        - The "is_causal" column indicates whether the source variable causes the effect variable.
+        """
+        causal_dataframes = {}
+        for dag_idx, dag in enumerate(self._rename_dags(self.dags, self.n_variables)):
             pairs = [
                 (source, effect)
                 for source in range(
@@ -201,7 +210,13 @@ class DataLoader:
                 for effect in range(self.n_variables)
             ]
             multi_index = pd.MultiIndex.from_tuples(pairs, names=["from", "to"])
-            causal_dataframe = pd.DataFrame(index=multi_index, columns=["is_causal"])
+            causal_dataframe = pd.DataFrame(
+                index=multi_index,
+                columns=["effect", "p_value", "probability", "is_causal"],
+            )
+            causal_dataframe["effect"] = None
+            causal_dataframe["p_value"] = None
+            causal_dataframe["probability"] = None
             causal_dataframe["is_causal"] = 0
             for edge in dag.edges:
                 source = edge[0]
@@ -212,6 +227,6 @@ class DataLoader:
             causal_dataframe = causal_dataframe.loc[
                 causal_dataframe.to < self.n_variables
             ]
-            causal_dataframes.append(causal_dataframe)
+            causal_dataframes[dag_idx] = causal_dataframe
 
         return causal_dataframes

@@ -113,7 +113,7 @@ class TSBuilder:
 
             for ts_index in range(self.ts_per_process):
                 if self.verbose:
-                    print(f"{ts_index}/{self.ts_per_process}", end="\r")
+                    print(f"{ts_index + 1 }/{self.ts_per_process}", end="\r")
                 # The seeding is here because attempts can vary across executions, likely due to floating point operations
 
                 attempted_series = []
