@@ -1,57 +1,76 @@
 # TD2C (Time-Dependency to Causality)
 **TD2C (Time-Dependency to Causality)** is a library for time series causal discovery. It focuses on computing asymmetric conditional mutual information terms, known as descriptors, within the Markov blankets of variable pairs.
 
+N.B. This procedure was tested in Linux. If you have Windows, you can use WSL.
+
 ## Clone 
 Make sure you only get the latest commit 
 ```
 git clone --depth 1 https://github.com/gmpal/td2c
 ```
 
-## Setup
+If you already have a working environment, go to step [2](#step2)
+
+## Python, poetry
 To get started with TD2C, follow these steps:
 
-```
-sudo apt update
-sudo apt install -y build-essential libssl-dev libffi-dev python3-dev zlib1g-dev libbz2-dev libsqlite3-dev libreadline-dev libgdbm-dev liblzma-dev tk-dev
-```
+1. Install everything you need for pyenv
+    ```
+    sudo apt update
+    sudo apt install -y build-essential libssl-dev libffi-dev python3-dev zlib1g-dev libbz2-dev libsqlite3-dev libreadline-dev libgdbm-dev liblzma-dev tk-dev
+    ```
 
-1. Create a virtual environment with the tool of your choice:
-    1. Use `pyenv` (recommended, tested):
+2. Install `pyenv` (recommended, tested):
         ```
         curl https://pyenv.run | bash
         ```
 
-    2. Load pyenv automatically by appending the following to ~/.bash_profile if it exists, otherwise ~/.profile (for login shells) and  ~/.bashrc (for interactive shells)
+2. Load pyenv automatically by appending the following to ~/.bash_profile if it exists, otherwise ~/.profile (for login shells) and  ~/.bashrc (for interactive shells)
      
+    ```
+    export PYENV_ROOT="$HOME/.pyenv"
+    [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
         ```
-        export PYENV_ROOT="$HOME/.pyenv"
-        [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-        eval "$(pyenv init -)"
-        ```
-    3. Restart the shell. Then 
-        pyenv install 3.10
-        pyenv virtualenv 3.10 td2c
-        pyenv shell td2c
-        ```
+3. Restart the shell. Then 
 
-2. Install Poetry for dependencies management:
+    ```
+    pyenv install 3.10
+    pyenv virtualenv 3.10 td2c
+    pyenv shell td2c
+    ```
+
+4. Install Poetry for dependencies management:
     ```
     pip install --upgrade pip
     pip install poetry
     ```
 
-3. Install dependencies from `poetry.lock` file:
+5. Install dependencies from `poetry.lock` file:
     ```
+    poetry env use $(pyenv which python)
     poetry install
     ```
 
-4. If the above fails, you can resolve dependencies and try again. This will take a few minutes. 
+6. If the above fails, you can resolve dependencies and try again. This will take a few minutes. 
     ```
     poetry lock
     poetry install
     ```
 
-5. Setup completed. 
+## Environment already setup <a name="step2"></a>
+    ```
+    pip install poetry
+    poetry install
+    ```
+
+If you already have an environment, you can simply run from the project directory
+5. Setup completed. Now you can run a jupyter notebook and access the notebooks provided. 
+    
+    ```
+    jupyter notebook
+    ```
+
 
 ## Usage
 Check the notebooks in the [notebooks folder](./notebooks) for detailed examples and explanations:
