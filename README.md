@@ -68,6 +68,7 @@ If you already have an environment, you can simply run from the project director
 5. Setup completed. Now you can run a jupyter notebook and access the notebooks provided. 
     
     ```
+    poetry shell
     jupyter notebook
     ```
 

@@ -46,10 +46,10 @@ causalnex = "*"
 # torchvision = "*"
 ipykernel = "^6.29.5"
 
-[[tool.poetry.source]]
-name = "pytorch"
-url = "https://download.pytorch.org/whl/cu121"
-priority = "explicit"                          # means this URL will be checked for only for the packages where it is explicitly specified
+# [[tool.poetry.source]]
+# name = "pytorch"
+# url = "https://download.pytorch.org/whl/cu121"
+# priority = "explicit"                          # means this URL will be checked for only for the packages where it is explicitly specified
 
 
 # Here, specify development dependencies, which won't be part of the actual final dependency list
