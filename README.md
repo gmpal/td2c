@@ -1,20 +1,37 @@
 # TD2C (Time-Dependency to Causality)
 **TD2C (Time-Dependency to Causality)** is a library for time series causal discovery. It focuses on computing asymmetric conditional mutual information terms, known as descriptors, within the Markov blankets of variable pairs.
 
+## Clone 
+Make sure you only get the latest commit 
+```
+git clone --depth 1 https://github.com/gmpal/td2c
+```
+
 ## Setup
 To get started with TD2C, follow these steps:
 
+```
+sudo apt update
+sudo apt install -y build-essential libssl-dev libffi-dev python3-dev zlib1g-dev libbz2-dev libsqlite3-dev libreadline-dev libgdbm-dev liblzma-dev tk-dev
+```
+
 1. Create a virtual environment with the tool of your choice:
-    1. Use `pyenv` (recommended):
+    1. Use `pyenv` (recommended, tested):
         ```
         curl https://pyenv.run | bash
+        ```
+
+    2. Load pyenv automatically by appending the following to ~/.bash_profile if it exists, otherwise ~/.profile (for login shells) and  ~/.bashrc (for interactive shells)
+     
+        ```
+        export PYENV_ROOT="$HOME/.pyenv"
+        [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init -)"
+        ```
+    3. Restart the shell. Then 
+        pyenv install 3.10
         pyenv virtualenv 3.10 td2c
         pyenv shell td2c
-        ```
-    2. Use `conda`:
-        ```
-        conda create --name td2c python=3.8.19 ipython
-        conda activate td2c
         ```
 
 2. Install Poetry for dependencies management:

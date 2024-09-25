@@ -36,14 +36,14 @@ tigramite = "*"
 lingam = "*"
 causalnex = "*"
 
-keras = "*"
-torch = [
-    { version = "^2.0.0", source = "pytorch", platform = "linux" },
-    { version = "^2.0.0", source = "pypi", platform = "darwin" },
-]
+# keras = "*"
+# torch = [
+#     { version = "^2.0.0", source = "pytorch", platform = "linux" },
+#     { version = "^2.0.0", source = "pypi", platform = "darwin" },
+# ]
 
-lightning = "*"
-torchvision = "*"
+# lightning = "*"
+# torchvision = "*"
 ipykernel = "^6.29.5"
 
 [[tool.poetry.source]]
