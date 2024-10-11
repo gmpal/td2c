@@ -31,10 +31,20 @@ seaborn = "*"
 dcor = "*"
 matplotlib = "*"
 #competitors
-statsmodels = "*"
-tigramite = "*"
+# statsmodels = "*"
+# tigramite = "*"
 lingam = "*"
 causalnex = "*"
+cdt = "*"
+causalgraphicalmodels = "*"
+causal-playground = "*"
+causal-learn = "*"
+torch = "*"
+torchvision = "*"
+torchaudio = "*"
+torch-geometric = "*"
+tqdm = "*"
+
 
 # keras = "*"
 # torch = [

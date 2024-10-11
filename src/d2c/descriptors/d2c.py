@@ -1,6 +1,7 @@
 from multiprocessing import Pool
 import pandas as pd
 import numpy as np
+import itertools
 from scipy.stats import kurtosis, skew
 
 from d2c.descriptors.utils import coeff, HOC
@@ -90,8 +91,6 @@ class D2C:
         self.DAGs = dags
         self.observations = observations
         self.couples_to_consider_per_dag = couples_to_consider_per_dag
-        self.n_variables = n_variables
-        self.maxlags = maxlags
         self.mutual_information_proxy = mutual_information_proxy
         self.proxy_params = proxy_params
         self.verbose = verbose
@@ -100,10 +99,9 @@ class D2C:
         self.cmi = cmi
         self.normalize = normalize
 
-        self.x_y = None  # Placeholder for computed descriptors, list of dictionaries
-        self.test_couples = (
-            []
-        )  # List of couples for which descriptors have been computed
+        self.descriptors_df = (
+            None  # Placeholder for computed descriptors, list of dictionaries
+        )
 
         self.markov_blanket_estimator = MarkovBlanketEstimator(
             size=min(MB_size, n_variables - 2), n_variables=n_variables, maxlags=maxlags
@@ -126,20 +124,18 @@ class D2C:
         Initialize the D2C object by computing descriptors in parallel for all observations.
 
         """
-        if self.couples_to_consider_per_dag == -1:
-            num_samples = -1
-        else:
-            num_samples = (
-                self.couples_to_consider_per_dag // 3
-            )  # because 1/3 is causal A->B, 1/3 is B->A, 1/3 is other non-causal that respect time
+        # if self.couples_to_consider_per_dag == -1:
+        num_samples = -1
+        # else:
+        #     num_samples = (
+        #         self.couples_to_consider_per_dag // 3
+        #     )  # because 1/3 is causal A->B, 1/3 is B->A, 1/3 is other non-causal that respect time
 
         if self.n_jobs == 1:
             results = [
                 self.compute_descriptors_with_dag(
                     dag_idx,
                     dag,
-                    self.n_variables,
-                    self.maxlags,
                     num_samples=num_samples,
                 )
                 for dag_idx, dag in enumerate(self.DAGs)
@@ -147,15 +143,14 @@ class D2C:
 
         else:
             args = [
-                (dag_idx, dag, self.n_variables, self.maxlags, num_samples)
-                for dag_idx, dag in enumerate(self.DAGs)
+                (dag_idx, dag, num_samples) for dag_idx, dag in enumerate(self.DAGs)
             ]
             with Pool(processes=self.n_jobs) as pool:
                 results = pool.starmap(self.compute_descriptors_with_dag, args)
 
         # merge lists into a single list
         results = [item for sublist in results for item in sublist]
-        self.x_y = results
+        self.descriptors_df = results
 
     def compute_descriptors_without_dag(self, n_variables, maxlags) -> list:
         """
@@ -187,9 +182,7 @@ class D2C:
 
         return pd.DataFrame(results)
 
-    def compute_descriptors_with_dag(
-        self, dag_idx, dag, n_variables, maxlags, num_samples=20
-    ) -> list:
+    def compute_descriptors_with_dag(self, dag_idx, dag, num_samples=20) -> list:
         """
         Compute all descriptors associated to a directed acyclic graph (DAG).
         This is useful for synthetic training data, but not for real testing data.
@@ -206,89 +199,52 @@ class D2C:
             List of couples contains the computed descriptors, and the labels (1 for causal links, 0 for non-causal links).
         """
 
-        x_y_couples = []
+        # x_y_couples = []
 
-        all_possible_links = {
-            (i, j)
-            for i in range(n_variables, n_variables + n_variables * maxlags)
-            for j in range(n_variables)
-            if i != j
-        }
+        all_possible_links = list(itertools.permutations(list(dag.nodes()), 2))
 
-        causal_links = list(
-            set(
-                [(int(parent), int(child)) for parent, child in dag.edges]
-            ).intersection(all_possible_links)
-        )
-        non_causal_links = list(all_possible_links - set(causal_links))
+        return [
+            self.compute_descriptors_for_couple(
+                dag_idx, parent, child, label=(parent, child) in list(dag.edges())
+            )
+            for parent, child in all_possible_links
+        ]
 
-        if num_samples == -1:
-            for parent, child in causal_links:
-                x_y_couples.append(
-                    self.compute_descriptors_for_couple(dag_idx, parent, child, label=1)
-                )  # causal
-            for node_a, node_b in non_causal_links:
-                x_y_couples.append(
-                    self.compute_descriptors_for_couple(
-                        dag_idx, node_a, node_b, label=0
-                    )
-                )  # noncausal, time ordered
+        # print()
+        # if num_samples == -1:
+        #     for parent, child in causal_links:
 
-            self.test_couples.extend(causal_links)
-            self.test_couples.extend(non_causal_links)
+        #     for node_a, node_b in non_causal_links:
+        #         x_y_couples.append(
+        #             self.compute_descriptors_for_couple(
+        #                 dag_idx, node_a, node_b, label=0
+        #             )
+        #         )  # noncausal
 
-        else:
+        # else:
+        #     subset_causal_links = np.random.permutation(causal_links)[
+        #         : min(len(causal_links), num_samples)
+        #     ].astype(int)
 
-            subset_causal_links = np.random.permutation(causal_links)[
-                : min(len(causal_links), num_samples)
-            ].astype(int)
-            subset_non_causal_links = np.random.permutation(non_causal_links)[
-                : min(len(non_causal_links), num_samples)
-            ].astype(int)
+        #     subset_non_causal_links = np.random.permutation(non_causal_links)[
+        #         : min(len(non_causal_links), num_samples)
+        #     ].astype(int)
 
-            # dag_idx = dag.graph['index']
+        #     for parent, child in subset_causal_links:
+        #         x_y_couples.append(
+        #             self.compute_descriptors_for_couple(dag_idx, parent, child, label=1)
+        #         )  # causal
+        #         x_y_couples.append(
+        #             self.compute_descriptors_for_couple(dag_idx, child, parent, label=0)
+        #         )  # noncausal, not time ordered (yet informative)
+        #     for node_a, node_b in subset_non_causal_links:
+        #         x_y_couples.append(
+        #             self.compute_descriptors_for_couple(
+        #                 dag_idx, node_a, node_b, label=0
+        #             )
+        #         )  # noncausal, time ordered
 
-            for parent, child in subset_causal_links:
-                x_y_couples.append(
-                    self.compute_descriptors_for_couple(dag_idx, parent, child, label=1)
-                )  # causal
-                x_y_couples.append(
-                    self.compute_descriptors_for_couple(dag_idx, child, parent, label=0)
-                )  # noncausal, not time ordered (yet informative)
-            for node_a, node_b in subset_non_causal_links:
-                x_y_couples.append(
-                    self.compute_descriptors_for_couple(
-                        dag_idx, node_a, node_b, label=0
-                    )
-                )  # noncausal, time ordered
-
-            self.test_couples.extend(subset_causal_links)
-            self.test_couples.extend(subset_non_causal_links)
-
-        return x_y_couples
-
-    def get_markov_blanket(self, dag, node):
-        """
-        Computes the REAL Markov Blanket of a node in a specific DAG.
-        It uses the dag structure, therefore this is not an estimate.
-        This is not applicable in realistic settings, because it won't
-        be possible to use it on observational data (unknown dag).
-
-        Parameters:
-        dag (networkx.DiGraph): The DAG.
-        node (int): The node index.
-
-        Returns:
-        list: The Markov Blanket of the node.
-        """
-        parents = list(dag.predecessors(node))
-        children = list(dag.successors(node))
-        parents_of_children = []
-        for child in children:
-            parents_of_children.extend(list(dag.predecessors(child)))
-        parents_of_children = list(set(parents_of_children))
-
-        return list(set(parents + parents_of_children + children))
+        # return x_y_couples
 
     def standardize_data(self, observations):
         """Standardizes the observation DataFrame."""
@@ -354,7 +310,7 @@ class D2C:
         for i, q in enumerate(values):
             dictionary[f"{name}_{i}"] = q
 
-    def compute_descriptors_for_couple(self, dag_idx, ca, ef, label):
+    def compute_descriptors_for_couple(self, dag_idx, ca_name, ef_name, label):
         """
         Compute descriptors for a given couple of nodes in a directed acyclic graph (DAG).
 
@@ -368,24 +324,20 @@ class D2C:
             dict: A dictionary containing the computed descriptors.
 
         """
-        # pq=[0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95]
-        pq = [0.25, 0.5, 0.75]
+        pq = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95]
+        # pq = [0.25, 0.5, 0.75]
 
         if self.normalize:
-            observations = self.standardize_data(self.observations[dag_idx])
+            observations_df = self.standardize_data(self.observations[dag_idx])
         else:
-            observations = self.observations[dag_idx]
+            observations_df = self.observations[dag_idx]
 
-        if self.mb_estimator == "original":
-            MBca = self.markov_blanket_estimator.estimate(observations, node=ca)
-            MBef = self.markov_blanket_estimator.estimate(observations, node=ef)
-        elif self.mb_estimator == "ts":
-            MBca = self.markov_blanket_estimator.estimate_time_series(
-                observations, node=ca
-            )
-            MBef = self.markov_blanket_estimator.estimate_time_series(
-                observations, node=ef
-            )
+        ca = list(observations_df.columns).index(ca_name)
+        ef = list(observations_df.columns).index(ef_name)
+        observations = observations_df.to_numpy()
+
+        MBca = self.markov_blanket_estimator.estimate(observations, node=ca)
+        MBef = self.markov_blanket_estimator.estimate(observations, node=ef)
 
         common_causes = list(set(MBca).intersection(MBef))
         mbca_mbef_couples = [(i, j) for i in range(len(MBca)) for j in range(len(MBef))]
@@ -407,8 +359,8 @@ class D2C:
 
         values = {}
         values["graph_id"] = dag_idx
-        values["edge_source"] = ca
-        values["edge_dest"] = ef
+        values["edge_source"] = ca_name
+        values["edge_dest"] = ef_name
         values["is_causal"] = label
 
         # b: ef = b * (ca + mbef)
@@ -609,7 +561,4 @@ class D2C:
             pd.DataFrame: The concatenated DataFrame of X and Y.
 
         """
-        return pd.DataFrame(self.x_y)
-
-    def get_test_couples(self):
-        return self.test_couples
+        return pd.DataFrame(self.descriptors_df)

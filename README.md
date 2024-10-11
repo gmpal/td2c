@@ -1,12 +1,12 @@
-# TD2C (Time-Dependency to Causality)
-**TD2C (Time-Dependency to Causality)** is a library for time series causal discovery. It focuses on computing asymmetric conditional mutual information terms, known as descriptors, within the Markov blankets of variable pairs.
+# D2C (Dependency to Causality)
+**D2C (Dependency to Causality)** is a library for causal discovery. It focuses on computing asymmetric conditional mutual information terms, known as descriptors, within the estimated Markov blankets of variable pairs.
 
 N.B. This procedure was tested in Linux. If you have Windows, you can use WSL.
 
 ## Clone 
 Make sure you only get the latest commit 
 ```
-git clone --depth 1 https://github.com/gmpal/td2c
+git clone --depth 1 https://github.com/gmpal/d2c
 ```
 
 If you already have a working environment, go to step [2](#step2)
@@ -78,5 +78,25 @@ Check the notebooks in the [notebooks folder](./notebooks) for detailed examples
 
 - [00_data_generation.ipynb](./notebooks/00_data_generation.ipynb): Demonstrates how to generate synthetic data for testing the TD2C library.
 - [01_descriptors_computation.ipynb](./notebooks/01_descriptors_computation.ipynb): Shows how to compute the descriptors using the TD2C library.
-- [02_run_competitors.ipynb](./notebooks/02_run_competitors.ipynb): Provides examples of running competitor algorithms for comparison.
-- [03_collect_results.ipynb](./notebooks/03_collect_results.ipynb): Illustrates how to collect and analyze the results from the experiments.
+- [02_performances.ipynb](./notebooks/02_performances.ipynb): Provides results of cross validation performances.
+
+
+## Logs
+TODOs:
+- show DAG reconstruction 
+- try DNN approaches (can we avoid descriptors?)
+- make a full benchmark pipeline
+
+2024.10.07 15h00
+- added competitors
+
+
+2024.10.07 13h00
+- add noise 
+- made tests to handle noise
+- TODO: make noise flexible and the user can choose it 
+
+2024.10.04, 13h00
+- add kwargs for specific functions 
+2024.10.04, 11h00
+-First verion published, preliminary results on cross validation only
