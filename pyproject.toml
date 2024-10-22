@@ -15,7 +15,7 @@ build-backend = "poetry.core.masonry.api"
 
 # Specify Python version(s) and real dependencies in this section
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.10,<=3.13"
 jupyter = "*"
 jupyterlab_server = "*"
 jupyterlab = "*"
@@ -34,7 +34,6 @@ matplotlib = "*"
 # statsmodels = "*"
 # tigramite = "*"
 lingam = "*"
-causalnex = "*"
 cdt = "*"
 causalgraphicalmodels = "*"
 causal-playground = "*"
@@ -54,7 +53,7 @@ tqdm = "*"
 
 # lightning = "*"
 # torchvision = "*"
-ipykernel = "^6.29.5"
+ipykernel = "*"
 
 # [[tool.poetry.source]]
 # name = "pytorch"
@@ -80,3 +79,7 @@ pytest-testmon = "*"
 pytest-xdist = "*"
 nbmake = "*"
 hydra-core = "*"
+
+
+llvmlite = "0.43.0"
+numba = "0.60.0"
