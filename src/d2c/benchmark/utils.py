@@ -1,3 +1,71 @@
+import pandas as pd
+
+def prepare_prediction_df_d2c(causal_dfs_pred, true_causal_dfs):
+    """
+    Align predicted and true causal data, ensuring proper correspondence.
+    
+    Parameters:
+    causal_dfs_pred: dict with DataFrames containing 'from', 'to', 'probability' columns (therefore only TD2C)
+    true_causal_dfs: dict with DataFrames containing 'from', 'to', 'is_causal' columns
+    
+    Returns:
+    pd.DataFrame with columns: 'dataset', 'from', 'to', 'y_pred', 'y_true'
+    """
+    
+    # Check if keys match
+    pred_keys = causal_dfs_pred.keys()
+    true_keys = true_causal_dfs.keys()
+    
+    if pred_keys != true_keys:
+        raise ValueError(f"Keys don't match! Pred keys: {pred_keys}, True keys: {true_keys}")
+    
+    aligned_data = []
+    
+    for key in sorted(pred_keys):
+        pred_df = causal_dfs_pred[key].copy()
+        true_df = true_causal_dfs[key].copy()
+        
+        # Check if both dataframes have the same shape
+        if pred_df.shape[0] != true_df.shape[0]:
+            raise ValueError(f"Dataset {key}: Different number of rows! Pred: {pred_df.shape[0]}, True: {true_df.shape[0]}")
+        
+        # Check required columns
+        if not all(col in pred_df.columns for col in ['from', 'to', 'probability']):
+            raise ValueError(f"Dataset {key}: Missing required columns in predicted data")
+        
+        if not all(col in true_df.columns for col in ['from', 'to', 'is_causal']):
+            raise ValueError(f"Dataset {key}: Missing required columns in true data")
+        
+        # Sort both dataframes by 'from' and 'to' to ensure alignment
+        pred_df_sorted = pred_df.sort_values(['from', 'to']).reset_index(drop=True)
+        true_df_sorted = true_df.sort_values(['from', 'to']).reset_index(drop=True)
+        
+        # Check if from-to pairs match exactly
+        pred_pairs = pred_df_sorted[['from', 'to']].values
+        true_pairs = true_df_sorted[['from', 'to']].values
+        
+        if not (pred_pairs == true_pairs).all():
+            raise ValueError(f"Dataset {key}: from-to pairs don't match between predicted and true data")
+        
+        # Create aligned dataframe for this dataset
+        dataset_df = pd.DataFrame({
+            'dataset': key,
+            'from': pred_df_sorted['from'],
+            'to': pred_df_sorted['to'],
+            'y_pred': pred_df_sorted['probability'],
+            'y_true': true_df_sorted['is_causal']
+        })
+        
+        aligned_data.append(dataset_df)
+    
+    # Combine all datasets
+    result_df = pd.concat(aligned_data, ignore_index=True)
+    
+    return result_df
+
+
+
+
 # Author: Hassan Ismail Fawaz <hassan.ismail-fawaz@uha.fr>
 #         Germain Forestier <germain.forestier@uha.fr>
 #         Jonathan Weber <jonathan.weber@uha.fr>
@@ -12,8 +80,6 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-matplotlib.rcParams['font.family'] = 'sans-serif'
-matplotlib.rcParams['font.sans-serif'] = 'Arial'
 
 import operator
 import math

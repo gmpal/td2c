@@ -135,6 +135,25 @@ class DataLoader:
             )  # np roll brings last values to the top
         return lagged[maxlags:]
 
+    def load_netsym(self, data_path):
+        #load .mat files
+        import scipy.io as sio
+        import numpy as np
+
+        # load data
+        for file in os.listdir(data_path):
+
+            data = sio.loadmat(data_path + file)
+            observations = data['ts']
+            dag = nx.DiGraph(data['dag'])
+
+            
+        with open(data_path, "rb") as f:
+            loaded_data = pickle.load(f)
+        self.observations = self._flatten(loaded_data["observations"])
+        self.dags = self._flatten(loaded_data["dags"])
+
+
     def from_pickle(self, data_path):
         """
         Data loader from a data file.

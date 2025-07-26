@@ -39,7 +39,8 @@ class TSBuilder:
         n_variables: int = 5,
         time_series_per_process: int = 10,
         processes_to_use=None,
-        noise_std: float = 0.1,
+        noise_dist: str = "gaussian",
+        noise_scale: float = 0.1,
         max_neighborhood_size: int = 6,
         seed: int = 42,
         max_attempts: int = 20,
@@ -63,7 +64,8 @@ class TSBuilder:
         self.maxlags = maxlags  # This is only used to build the corresponding DAGs
         self.n_variables = n_variables
         self.ts_per_process = time_series_per_process
-        self.noise_std = noise_std
+        self.noise_scale = noise_scale
+        self.noise_dist = noise_dist
         self.seed = seed
         self.max_attempts = max_attempts
 
@@ -121,9 +123,29 @@ class TSBuilder:
                 attempts = 0
                 while attempts < self.max_attempts:
 
-                    W = np.random.normal(
-                        0, self.noise_std, (total_ts_lines, self.n_variables)
-                    )
+                    if self.noise_dist == "gaussian":
+                        W = np.random.normal(
+                            0, self.noise_scale, (total_ts_lines, self.n_variables)
+                        )
+                    elif self.noise_dist == "laplace":
+                        W = np.random.laplace(
+                            0, self.noise_scale, (total_ts_lines, self.n_variables)
+                        )
+                    elif self.noise_dist == "uniform":
+                        # Uniform noise. We scale the bounds so its standard deviation
+                        # is approximately equal to noise_scale.
+                        # Var(U(-a, a)) = (2a)^2 / 12 = a^2 / 3.
+                        # StdDev = a / sqrt(3). So, a = StdDev * sqrt(3).
+                        bound = self.noise_scale * np.sqrt(3)
+                        W = np.random.uniform(
+                            -bound, bound, (total_ts_lines, self.n_variables)
+                        )
+                    else:
+                        raise ValueError(
+                            f"Unknown noise distribution: '{self.noise_dist}'. "
+                            "Choose from 'gaussian', 'laplace', 'uniform'."
+                        )
+                    
                     # noise to zero
                     # W = np.zeros((total_ts_lines, self.n_variables))
                     size_N_j = np.random.randint(
@@ -250,3 +272,15 @@ class TSBuilder:
                 ),
                 f,
             )
+
+    def include_real_data(self, pickle_file):
+        """
+        Includes real data from a pickle file into the generated data.
+
+        Args:
+            pickle_file (str): Path to the pickle file containing real data.
+        """
+        with open(pickle_file, "rb") as f:
+            observations, dags = pickle.load(f)
+            self.generated_observations.update(observations)
+            self.generated_dags.update(dags)
